@@ -11,9 +11,11 @@ import (
 )
 
 func main() {
+	filepath := os.Args[1]
+
 	// parse file
 	fset := token.NewFileSet()
-	node, err := parser.ParseFile(fset, "test.go", nil, parser.ParseComments)
+	node, err := parser.ParseFile(fset, filepath, nil, parser.ParseComments)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -33,7 +35,7 @@ func main() {
 				fmt.Printf("exported function declaration without documentation found on line %d: \n\t%s\n", fset.Position(fn.Pos()).Line, fn.Name.Name)
 				// create todo-comment
 				comment := &ast.Comment{
-					Text:  "// TODO: document exported function",
+					Text:  "//"+fn.Name.Name+" TODO: document exported function",
 					Slash: fn.Pos() - 1,
 				}
 				// create CommentGroup and set it to the function's documentation comment
@@ -49,7 +51,7 @@ func main() {
 	// set ast's comments to the collected comments
 	node.Comments = comments
 	// write new ast to file
-	f, err := os.Create("new.go")
+	f, err := os.Create(filepath)
 	defer f.Close()
 	if err := printer.Fprint(f, fset, node); err != nil {
 		log.Fatal(err)
