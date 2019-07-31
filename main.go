@@ -8,21 +8,46 @@ import (
 	"go/token"
 	"log"
 	"os"
+	"path/filepath"
+	"strings"
 )
 
 func main() {
-	filepath := os.Args[1]
+	for _, filename := range os.Args[1:] {
+		fi, err := os.Stat(filename)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		switch mode := fi.Mode(); {
+		case mode.IsDir():
+			err = filepath.Walk(fi.Name(), func(pathX string, infoX os.FileInfo, errX error) error {
+				return fixComment(pathX)
+			})
+		case mode.IsRegular():
+			err = fixComment(fi.Name())
+		}
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+}
 
-	// parse file
+func fixComment(filename string) error {
+	if !strings.HasSuffix(filename, ".go") {
+		fmt.Println("Skip " + filename)
+		return nil
+	}
+
 	fset := token.NewFileSet()
-	node, err := parser.ParseFile(fset, filepath, nil, parser.ParseComments)
+	node, err := parser.ParseFile(fset, filename, nil, parser.ParseComments)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	comments := []*ast.CommentGroup{}
 	ast.Inspect(node, func(n ast.Node) bool {
-		// collect comments
+
 		c, ok := n.(*ast.CommentGroup)
 		if ok {
 			comments = append(comments, c)
@@ -31,7 +56,7 @@ func main() {
 		switch n.(type) {
 		case *ast.FuncDecl:
 			fn := n.(*ast.FuncDecl)
-			if cg := createCommentGroup(fn.Name, fn.Doc, fn.Pos(), fset.Position(fn.Pos()).Line, "function"); cg != nil {
+			if cg := createCommentGroup(fn.Name, fn.Doc, fn.Pos(),filename, fset.Position(fn.Pos()).Line, "function"); cg != nil {
 				fn.Doc = cg
 			}
 		case *ast.GenDecl:
@@ -40,7 +65,7 @@ func main() {
 				switch gd.Specs[i].(type) {
 				case *ast.TypeSpec:
 					ts := gd.Specs[i].(*ast.TypeSpec)
-					if cg := createCommentGroup(ts.Name, gd.Doc, gd.Pos(), fset.Position(ts.Pos()).Line, "type"); cg != nil {
+					if cg := createCommentGroup(ts.Name, gd.Doc, gd.Pos(),filename, fset.Position(ts.Pos()).Line, "type"); cg != nil {
 						ts.Doc = cg
 					}
 				case *ast.ValueSpec:
@@ -55,7 +80,7 @@ func main() {
 						doc = gd.Doc
 					}
 					for j := range vs.Names {
-						if cg := createCommentGroup(vs.Names[j], doc, pos, fset.Position(vs.Pos()).Line, "value"); cg != nil {
+						if cg := createCommentGroup(vs.Names[j], doc, pos,filename, fset.Position(vs.Pos()).Line, "value"); cg != nil {
 							vs.Doc = cg
 						}
 					}
@@ -64,24 +89,23 @@ func main() {
 		}
 		return true
 	})
-	// set ast's comments to the collected comments
+
 	node.Comments = comments
-	// write new ast to file
-	f, err := os.Create(filepath)
+
+	f, err := os.Create(filename)
 	defer f.Close()
-	if err := printer.Fprint(f, fset, node); err != nil {
-		log.Fatal(err)
-	}
+	err = printer.Fprint(f, fset, node)
+	return err
 }
 
-func createCommentGroup(ident *ast.Ident, doc *ast.CommentGroup, pos token.Pos, line int, declType string) *ast.CommentGroup {
+func createCommentGroup(ident *ast.Ident, doc *ast.CommentGroup, pos token.Pos,filename string, line int, declType string) *ast.CommentGroup {
 	if ident.IsExported() && doc.Text() == "" {
-		fmt.Printf("exported "+declType+" declaration without documentation found on line %d: \n\t%s\n", line, ident.Name)
+		fmt.Printf("%s: exported "+declType+" declaration without documentation found on line %d: \n\t%s\n",filename, line, ident.Name)
 		comment := &ast.Comment{
-			Text:  "//" + ident.Name + " TODO: document exported " + declType,
-			Slash: pos - 1,
+			Text:	"//" + ident.Name + " TODO: document exported " + declType,
+			Slash:	pos - 1,
 		}
-		// create CommentGroup and set it to the function's documentation comment
+
 		cg := &ast.CommentGroup{
 			List: []*ast.Comment{comment},
 		}

@@ -18,12 +18,10 @@ func Whatever() {
 
 }
 
-//AnExportedFunction TODO: document exported function
 func AnExportedFunction() {
 
 }
 
-//DoStuff TODO: document exported function
 func DoStuff() {
 
 }
