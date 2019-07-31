@@ -56,7 +56,7 @@ func fixComment(filename string) error {
 		switch n.(type) {
 		case *ast.FuncDecl:
 			fn := n.(*ast.FuncDecl)
-			if cg := createCommentGroup(fn.Name, fn.Doc, fn.Pos(),filename, fset.Position(fn.Pos()).Line, "function"); cg != nil {
+			if cg := createCommentGroup(fn.Name, fn.Doc, fn.Pos(), filename, fset.Position(fn.Pos()).Line, "function"); cg != nil {
 				fn.Doc = cg
 			}
 		case *ast.GenDecl:
@@ -65,7 +65,7 @@ func fixComment(filename string) error {
 				switch gd.Specs[i].(type) {
 				case *ast.TypeSpec:
 					ts := gd.Specs[i].(*ast.TypeSpec)
-					if cg := createCommentGroup(ts.Name, gd.Doc, gd.Pos(),filename, fset.Position(ts.Pos()).Line, "type"); cg != nil {
+					if cg := createCommentGroup(ts.Name, gd.Doc, gd.Pos(), filename, fset.Position(ts.Pos()).Line, "type"); cg != nil {
 						ts.Doc = cg
 					}
 				case *ast.ValueSpec:
@@ -80,7 +80,7 @@ func fixComment(filename string) error {
 						doc = gd.Doc
 					}
 					for j := range vs.Names {
-						if cg := createCommentGroup(vs.Names[j], doc, pos,filename, fset.Position(vs.Pos()).Line, "value"); cg != nil {
+						if cg := createCommentGroup(vs.Names[j], doc, pos, filename, fset.Position(vs.Pos()).Line, "value"); cg != nil {
 							vs.Doc = cg
 						}
 					}
@@ -98,12 +98,12 @@ func fixComment(filename string) error {
 	return err
 }
 
-func createCommentGroup(ident *ast.Ident, doc *ast.CommentGroup, pos token.Pos,filename string, line int, declType string) *ast.CommentGroup {
+func createCommentGroup(ident *ast.Ident, doc *ast.CommentGroup, pos token.Pos, filename string, line int, declType string) *ast.CommentGroup {
 	if ident.IsExported() && doc.Text() == "" {
-		fmt.Printf("%s: exported "+declType+" declaration without documentation found on line %d: \n\t%s\n",filename, line, ident.Name)
+		fmt.Printf("%s: exported "+declType+" declaration without documentation found on line %d: \n\t%s\n", filename, line, ident.Name)
 		comment := &ast.Comment{
-			Text:	"//" + ident.Name + " TODO: document exported " + declType,
-			Slash:	pos - 1,
+			Text:  "//" + ident.Name + " TODO: document exported " + declType,
+			Slash: pos - 1,
 		}
 
 		cg := &ast.CommentGroup{

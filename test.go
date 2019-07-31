@@ -10,17 +10,17 @@ func main() {
 }
 
 type GenerateReportHelper struct {
-	ProjectRoot	string
-	RunLocal	bool
-	BazelTargets	[]string
-	IncludeFiles	string
-	CiJobName	string
-	NoCoverageFile	string
+	ProjectRoot    string
+	RunLocal       bool
+	BazelTargets   []string
+	IncludeFiles   string
+	CiJobName      string
+	NoCoverageFile string
 }
 
 const (
-	HELLO	= "hello"
-	WORLD	= "world"
+	HELLO = "hello"
+	WORLD = "world"
 )
 
 const BAR = "bar"
