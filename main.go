@@ -45,6 +45,7 @@ func fixComment(filename string) error {
 		return err
 	}
 
+	changed := false
 	comments := []*ast.CommentGroup{}
 	ast.Inspect(node, func(n ast.Node) bool {
 
@@ -57,6 +58,7 @@ func fixComment(filename string) error {
 		case *ast.FuncDecl:
 			fn := n.(*ast.FuncDecl)
 			if cg := createCommentGroup(fn.Name, fn.Doc, fn.Pos(), filename, fset.Position(fn.Pos()).Line, "function"); cg != nil {
+				changed = true
 				fn.Doc = cg
 			}
 		case *ast.GenDecl:
@@ -66,6 +68,7 @@ func fixComment(filename string) error {
 				case *ast.TypeSpec:
 					ts := gd.Specs[i].(*ast.TypeSpec)
 					if cg := createCommentGroup(ts.Name, gd.Doc, gd.Pos(), filename, fset.Position(ts.Pos()).Line, "type"); cg != nil {
+						changed = true
 						ts.Doc = cg
 					}
 				case *ast.ValueSpec:
@@ -81,6 +84,7 @@ func fixComment(filename string) error {
 					}
 					for j := range vs.Names {
 						if cg := createCommentGroup(vs.Names[j], doc, pos, filename, fset.Position(vs.Pos()).Line, "value"); cg != nil {
+							changed = true
 							vs.Doc = cg
 						}
 					}
@@ -90,11 +94,14 @@ func fixComment(filename string) error {
 		return true
 	})
 
-	node.Comments = comments
+	if changed{
+		node.Comments = comments
 
-	f, err := os.Create(filename)
-	defer f.Close()
-	err = printer.Fprint(f, fset, node)
+		f, err = os.Create(filename)
+		defer f.Close()
+		err = printer.Fprint(f, fset, node)
+	}
+
 	return err
 }
 
