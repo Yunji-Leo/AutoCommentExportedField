@@ -35,7 +35,7 @@ func main() {
 
 func fixComment(filename string) error {
 	if !strings.HasSuffix(filename, ".go") {
-		fmt.Println("Skip " + filename)
+		//fmt.Println("Skip " + filename)
 		return nil
 	}
 
