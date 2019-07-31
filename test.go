@@ -10,18 +10,22 @@ func main() {
 }
 
 type GenerateReportHelper struct {
-	ProjectRoot    string
-	RunLocal       bool
-	BazelTargets   []string
-	IncludeFiles   string
-	CiJobName      string
-	NoCoverageFile string
+	ProjectRoot	string
+	RunLocal	bool
+	BazelTargets	[]string
+	IncludeFiles	string
+	CiJobName	string
+	NoCoverageFile	string
 }
 
-const(
-	HELLO = "hello"
-	WORLD = "world"
+const (
+	HELLO	= "hello"
+	WORLD	= "world"
 )
+
+const BAR = "bar"
+
+var FOO string
 
 func unexportedFunction() {
 
@@ -32,12 +36,11 @@ func Whatever() {
 
 }
 
-//AnExportedFunction TODO: document exported function
 func AnExportedFunction() {
-
+	XXX, YYY := "x", "y"
+	fmt.Println(XXX, YYY)
 }
 
-//DoStuff TODO: document exported function
 func DoStuff() {
 
 }
