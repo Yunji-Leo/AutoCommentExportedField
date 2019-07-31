@@ -94,12 +94,12 @@ func fixComment(filename string) error {
 		return true
 	})
 
-	if changed{
+	if changed {
 		node.Comments = comments
 
 		f, err := os.Create(filename)
 		defer f.Close()
-		if err != nil{
+		if err != nil {
 			return err
 		}
 		err = printer.Fprint(f, fset, node)

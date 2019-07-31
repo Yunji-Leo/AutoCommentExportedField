@@ -11,19 +11,19 @@ func main() {
 
 //GenerateReportHelper TODO: document exported type
 type GenerateReportHelper struct {
-	ProjectRoot	string
-	RunLocal	bool
-	BazelTargets	[]string
-	IncludeFiles	string
-	CiJobName	string
-	NoCoverageFile	string
+	ProjectRoot    string
+	RunLocal       bool
+	BazelTargets   []string
+	IncludeFiles   string
+	CiJobName      string
+	NoCoverageFile string
 }
 
 const (
 	//HELLO TODO: document exported value
-	HELLO	= "hello"
+	HELLO = "hello"
 	//WORLD TODO: document exported value
-	WORLD	= "world"
+	WORLD = "world"
 )
 
 //BAR TODO: document exported value
@@ -63,7 +63,4 @@ func (f *FOO) FooMethod() {
 }
 
 type itest interface {
-
 }
-
-
