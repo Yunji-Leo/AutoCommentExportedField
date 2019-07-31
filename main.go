@@ -21,11 +21,11 @@ func main() {
 		}
 		switch mode := fi.Mode(); {
 		case mode.IsDir():
-			err = filepath.Walk(fi.Name(), func(pathX string, infoX os.FileInfo, errX error) error {
+			err = filepath.Walk(filename, func(pathX string, infoX os.FileInfo, errX error) error {
 				return fixComment(pathX)
 			})
 		case mode.IsRegular():
-			err = fixComment(fi.Name())
+			err = fixComment(filename)
 		}
 		if err != nil {
 			log.Fatal(err)
